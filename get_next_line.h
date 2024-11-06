@@ -6,12 +6,16 @@
 /*   By: romashko <romashko@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 08:40:11 by romashko          #+#    #+#             */
-/*   Updated: 2024/10/28 22:14:57 by romashko         ###   ########.fr       */
+/*   Updated: 2024/11/06 13:56:01 by romashko         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
+
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 10
+# endif
 
 # include <fcntl.h>
 # include <stdio.h>
