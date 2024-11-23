@@ -6,84 +6,121 @@
 /*   By: romashko <romashko@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 08:37:01 by romashko          #+#    #+#             */
-/*   Updated: 2024/10/28 22:58:37 by romashko         ###   ########.fr       */
+/*   Updated: 2024/11/23 00:58:03 by romashko         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*check_left_str(char *left_str, char **line)
+char	*read_file(int fd, char *stash)
 {
-	char	*left_ptr;
+	int		bytes_read;
+	char	*buffer;
 	char	*temp;
 
-	left_ptr = NULL;
-	if (left_str)
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (buffer == NULL)
+		return (NULL);
+	while (1)
 	{
-		left_ptr = ft_strchr(left_str, '\n');
-		if (left_ptr)
-		{
-			*left_ptr = '\0';
-			*line = ft_strdup(left_str);
-			temp = ft_strdup(left_ptr + 1);
-			free(left_str);
-			left_str = temp;
-		}
-		else
-		{
-			*line = ft_strdup(left_str);
-			free(left_str);
-			left_str = NULL;
-		}
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read < 0)
+			return (free(buffer), NULL);
+		if (bytes_read == 0)
+			break ;
+		buffer[bytes_read] = '\0';
+		temp = ft_strjoin(stash, buffer);
+		free(stash);
+		stash = temp;
+		if (ft_strchr(stash, '\n') || !stash)
+			break ;
 	}
-	else
-		*line = ft_strdup("\0");
-	return (left_ptr);
+	return (free(buffer), stash);
 }
 
-char	*free_line(char **line, char buff[BUFFER_SIZE + 1])
+char	*line_from_stash(char *stash)
 {
-	char	*temp_line;
+	int		i;
+	char	*line;
 
-	temp_line = *line;
-	*line = ft_strjoin(temp_line, buff);
-	free(temp_line);
-	return (*line);
+	if (!stash || !*stash)
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	line = ft_calloc(i + (stash[i] == '\n') + 1, sizeof(char));
+	if (!line)
+		return (NULL);
+	ft_memcpy(line, stash, i + (stash[i] == '\n'));
+	return (line);
+}
+
+char	*new_stash_from_stash(char *stash)
+{
+	int		i;
+	int		len;
+	char	*new_stash;
+
+	if (!stash)
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	if (!stash[i])
+		return (free(stash), NULL);
+	len = ft_strlen(stash) - i - 1;
+	new_stash = ft_calloc(len + 1, sizeof(char));
+	if (!new_stash)
+		return (free(stash), NULL);
+	ft_memcpy(new_stash, stash + i + 1, len + 1);
+	return (free(stash), new_stash);
 }
 
 char	*get_next_line(int fd)
 {
-	char		buff[BUFFER_SIZE + 1];
 	char		*line;
-	char		*left_ptr;
-	size_t		bytes_read;
-	static char	*left_str;
+	static char	*stash;
 
-	left_ptr = check_left_str(left_str, &line);
-	bytes_read = read(fd, buff, BUFFER_SIZE);
-	while (bytes_read > 0 && !left_ptr)
+	if (fd < 0 || read(fd, NULL, 0) < 0 || BUFFER_SIZE <= 0)
 	{
-		buff[bytes_read] = '\0';
-		left_ptr = ft_strchr(buff, '\n');
-		if (left_ptr)
-		{
-			*left_ptr = '\0';
-			left_str = ft_strdup(++left_ptr);
-		}
-		line = free_line(&line, buff);
-		if (left_ptr)
-			break ;
-		bytes_read = read(fd, buff, BUFFER_SIZE);
+		if (stash != NULL)
+			return (free(stash), stash = NULL, NULL);
+		return (NULL);
 	}
+	if (!stash)
+		stash = ft_calloc(1, sizeof(char));
+	if (!ft_strchr(stash, '\n'))
+		stash = read_file(fd, stash);
+	if (!stash)
+		return (free(stash), NULL);
+	line = line_from_stash(stash);
+	stash = new_stash_from_stash(stash);
 	return (line);
 }
 
 // int	main(void)
 // {
-// 	int	fd;
+// 	int		fd;
+// 	char	*next_line;
+// 	int		count;
 
+// 	count = 0;
 // 	fd = open("text.txt", O_RDONLY);
-// 	printf("%s\n", get_next_line(fd));
-// 	printf("%s\n", get_next_line(fd));
+// 	if (fd == -1)
+// 	{
+// 		printf("Error opening file...");
+// 		return (1);
+// 	}
+// 	while (1)
+// 	{
+// 		next_line = get_next_line(fd);
+// 		if (next_line == NULL)
+// 			break ;
+// 		count++;
+// 		printf("[%d]: %s\n", count, next_line);
+// 		free(next_line);
+// 		next_line = NULL;
+// 	}
 // 	close(fd);
+// 	return (0);
 // }

@@ -6,7 +6,7 @@
 /*   By: romashko <romashko@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 08:39:04 by romashko          #+#    #+#             */
-/*   Updated: 2024/10/28 22:14:48 by romashko         ###   ########.fr       */
+/*   Updated: 2024/11/22 19:21:49 by romashko         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,60 +42,60 @@ char	*ft_strchr(const char *s, int c)
 
 char	*ft_strjoin(char const *s1, char const *s2)
 {
-	char	*str;
-	size_t	i;
-	size_t	j;
+	char	*result;
+	size_t	len1;
+	size_t	len2;
 
-	str = (char *)malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
-	if (!str)
+	if (!s1 || !s2)
 		return (NULL);
-	i = 0;
-	while (i != ft_strlen(s1))
-	{
-		str[i] = s1[i];
-		i++;
-	}
-	j = 0;
-	while (j != ft_strlen(s2))
-	{
-		str[i] = s2[j];
-		i++;
-		j++;
-	}
-	str[i] = '\0';
-	return (str);
+	len1 = ft_strlen(s1);
+	len2 = ft_strlen(s2);
+	result = (char *)malloc(sizeof(char) * (len1 + len2 + 1));
+	if (!result)
+		return (NULL);
+	ft_memcpy(result, s1, len1);
+	ft_memcpy(result + len1, s2, len2);
+	result[len1 + len2] = '\0';
+	return (result);
 }
 
-char	*ft_strdup(const char *s)
+void	*ft_calloc(size_t n, size_t size)
 {
-	char	*str;
-	size_t	i;
+	void			*arr;
+	unsigned char	*ptr;
+	size_t			i;
 
-	str = (char *)malloc(ft_strlen(s) * sizeof(char) + 1);
-	if (!str)
-	{
+	if (n == 0 || size == 0)
+		arr = (void *)malloc(0);
+	else
+		arr = (void *)malloc(n * size);
+	if (!arr)
 		return (NULL);
-	}
+	ptr = (unsigned char *)arr;
 	i = 0;
-	while (s[i] != '\0')
+	while (i < n)
 	{
-		str[i] = s[i];
+		ptr[i] = '\0';
 		i++;
 	}
-	str[i] = '\0';
-	return (str);
+	return (arr);
 }
 
-char	*ft_strcpy(char *dest, char *src)
+void	*ft_memcpy(void *dest, const void *src, size_t n)
 {
-	int	i;
+	size_t				i;
+	unsigned char		*d;
+	const unsigned char	*s;
 
+	if (!dest && !src)
+		return (NULL);
+	d = (unsigned char *)dest;
+	s = (const unsigned char *)src;
 	i = 0;
-	while (src[i] != '\0')
+	while (i < n)
 	{
-		dest[i] = src[i];
+		d[i] = s[i];
 		i++;
 	}
-	dest[i] = '\0';
 	return (dest);
 }
