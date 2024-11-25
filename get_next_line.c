@@ -3,29 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romashko <romashko@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oromashk <oromashk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 08:37:01 by romashko          #+#    #+#             */
-/*   Updated: 2024/11/23 00:58:03 by romashko         ###   ########.fr       */
+/*   Updated: 2024/11/24 15:56:51 by oromashk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*read_file(int fd, char *stash)
+char	*read_file(int fd, char *stash, char *buffer)
 {
 	int		bytes_read;
-	char	*buffer;
 	char	*temp;
 
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	if (buffer == NULL)
-		return (NULL);
 	while (1)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read < 0)
-			return (free(buffer), NULL);
+		if (bytes_read == -1)
+			return (free(stash), stash = NULL, NULL);
 		if (bytes_read == 0)
 			break ;
 		buffer[bytes_read] = '\0';
@@ -35,7 +31,7 @@ char	*read_file(int fd, char *stash)
 		if (ft_strchr(stash, '\n') || !stash)
 			break ;
 	}
-	return (free(buffer), stash);
+	return (stash);
 }
 
 char	*line_from_stash(char *stash)
@@ -80,17 +76,18 @@ char	*get_next_line(int fd)
 {
 	char		*line;
 	static char	*stash;
+	char		*buffer;
 
-	if (fd < 0 || read(fd, NULL, 0) < 0 || BUFFER_SIZE <= 0)
-	{
-		if (stash != NULL)
-			return (free(stash), stash = NULL, NULL);
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (free(stash), stash = NULL, NULL);
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (buffer == NULL)
 		return (NULL);
-	}
 	if (!stash)
 		stash = ft_calloc(1, sizeof(char));
 	if (!ft_strchr(stash, '\n'))
-		stash = read_file(fd, stash);
+		stash = read_file(fd, stash, buffer);
+	free(buffer);
 	if (!stash)
 		return (free(stash), NULL);
 	line = line_from_stash(stash);
@@ -105,7 +102,7 @@ char	*get_next_line(int fd)
 // 	int		count;
 
 // 	count = 0;
-// 	fd = open("text.txt", O_RDONLY);
+// 	fd = open("empty.txt", O_RDONLY);
 // 	if (fd == -1)
 // 	{
 // 		printf("Error opening file...");
@@ -115,12 +112,24 @@ char	*get_next_line(int fd)
 // 	{
 // 		next_line = get_next_line(fd);
 // 		if (next_line == NULL)
+// 		{
+// 			printf("YES, ITS NULL");
 // 			break ;
+// 		}
 // 		count++;
 // 		printf("[%d]: %s\n", count, next_line);
 // 		free(next_line);
 // 		next_line = NULL;
 // 	}
+// 	next_line = get_next_line(fd);
+// 	if (next_line == NULL)
+// 	{
+// 		printf("YES, ITS NULL\n");
+// 	}
+// 	count++;
+// 	printf("[%d]: %s\n", count, next_line);
+// 	free(next_line);
+// 	next_line = NULL;
 // 	close(fd);
 // 	return (0);
 // }
